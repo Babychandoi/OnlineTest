@@ -8,14 +8,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface ExamRepository extends JpaRepository<Exam, String> {
     List<Exam> findAllBySubjectOfGradeAndTeacher(SubjectOfGrade subjectOfGrade ,User teacher);
     List<Exam> findAllByTeacher(User teacher);
+    Page<Exam> findAllBySubjectOfGradeAndActive(SubjectOfGrade subjectOfGrade, Pageable pageable, Boolean active);
+    List<Exam> findAllBySubjectOfGrade(SubjectOfGrade subjectOfGrade);
     Page<Exam> findAllBySubjectOfGrade(SubjectOfGrade subjectOfGrade, Pageable pageable);
-
     @Query("""
     SELECT DISTINCT g.id, g.name, s.id, s.name
     FROM Exam e
@@ -25,7 +27,9 @@ public interface ExamRepository extends JpaRepository<Exam, String> {
     WHERE e.teacher.id = :teacherId
     """)
     List<Object[]> findGradeSubjectsByTeacher(@Param("teacherId") String teacherId);
+    Long countBySubjectOfGradeAndActive(SubjectOfGrade subjectOfGrade,Boolean active);
     Long countBySubjectOfGrade(SubjectOfGrade subjectOfGrade);
     Long countBySubjectOfGradeAndTeacher(SubjectOfGrade subjectOfGrade,User teacher);
+    List<Exam> findByCreateAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
 }

@@ -4,7 +4,7 @@ import { LoginResponse } from "../types/login";
 import { ApiResponse } from "../types/type";
 
 const axiosClient = axios.create({
-  baseURL:"http://localhost:8080" ,
+  baseURL:process.env.REACT_APP_API_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -46,7 +46,7 @@ export async function tryRefreshToken(): Promise<boolean> {
     const refreshToken = sessionStorage.getItem("refresh-token");
     if (!refreshToken) return false;
     try {
-      const response = await axios.post<ApiResponse<LoginResponse>>(`http://localhost:8080/auth/refresh`, {
+      const response = await axios.post<ApiResponse<LoginResponse>>(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
         refreshToken,
       });
   

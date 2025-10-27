@@ -8,6 +8,14 @@ import History from "../pages/history/index"
 import CompetitionList from "../pages/competition/section/CompetitionList";
 import ExamList from '../pages/subjects/section/exam/ExamList';
 import CompetitionExam from "../pages/competition/section/CompetitionExam";
+import Payment from "../pages/payment/index";
+import CreateExam from "../pages/subjects/section/exam/createExam";
+import CheckoutPage from "../pages/payment/section/CheckOutPage";
+import PaymentResultPage from '../pages/payment/section/VNPayReturnPage'
+import Home from "../pages/home/index"
+import Achievement from "../pages/ranking/index";
+import ForgotPassword from "../pages/login/section/ForgotPassword";
+import ResetPassword from "../pages/login/section/ResetPassword";
 export const indexRouter: any = {
     path: '/',
     element: (<Dashboard />),
@@ -23,8 +31,23 @@ export const indexRouter: any = {
                 {
                     path: 'signup',
                     element: (<Signup />)
+                },{
+                    path :'forgot-password',
+                    element : (<ForgotPassword />)
+
                 }
             ]
+        },
+        {
+            path : 'reset-password',
+            element : (<ResetPassword />)
+        },
+        {
+            path : "",
+            element : (<Home />)
+        },{
+            path : 'achievements',
+            element : (<Achievement />)
         },
         {
             path : 'profile',
@@ -46,6 +69,19 @@ export const indexRouter: any = {
         },{
             path :'competition',
             element : (<CompetitionExam />)
+        },{
+            path : 'payment',
+            element : (<Payment />)
+        },
+        {
+            path :'create-exam',
+            element : (<CreateExam />)
+        },{
+            path : 'payment/checkout',
+            element : (<CheckoutPage/>)
+        },{
+            path : 'payment/result',
+            elemet : (<PaymentResultPage />)
         }
     ]
 }

@@ -57,6 +57,7 @@ public class ExamServiceImpl implements ExamService {
                 totalScore += question.getScore();
             }
             exam.setTotalScore(totalScore);
+            exam.setActive(true);
             Exam examFinal  = examRepository.save(exam);
             List<QuestionRequest> questions = examRequest.getQuestions();
             questions.forEach(questionRequest -> {
@@ -105,7 +106,7 @@ public class ExamServiceImpl implements ExamService {
                     gradeRepository.findById(gradeId)
                             .orElseThrow(()-> new RuntimeException("Grade not found"))
             );
-            Page<Exam> exams = examRepository.findAllBySubjectOfGrade(subjectOfGrade, pageable);
+            Page<Exam> exams = examRepository.findAllBySubjectOfGradeAndActive(subjectOfGrade, pageable,true);
             return exams.map(examMapper::toExamResponse);
         }catch (Exception e){
             log.error("Error getting exams: {}", e.getMessage());
@@ -262,6 +263,37 @@ public class ExamServiceImpl implements ExamService {
         }catch (Exception e){
             log.error("Error getting results: {}", e.getMessage());
             throw new RuntimeException("Error getting results");
+        }
+    }
+
+    @Override
+    public List<GradeResponse> getGrades() {
+        try {
+            List<Grade> grades = gradeRepository.findAll();
+            return grades.stream().map(grade -> GradeResponse.builder()
+                    .id(grade.getId())
+                    .name(grade.getName())
+                    .build()).toList();
+        }catch (Exception e){
+            log.error("Error getting grades: {}", e.getMessage());
+            throw new RuntimeException("Error getting grades");
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('TEACHER') or hasRole('ADMIN')")
+    public List<SubjectRes> getSubjects(String gradeId) {
+        try {
+            Grade grade = gradeRepository.findById(gradeId)
+                    .orElseThrow(()-> new RuntimeException("Grade not found"));
+            List<SubjectOfGrade> subjectOfGrades = subjectOfGradeRepository.findAllByGrade(grade);
+            return subjectOfGrades.stream().map(subjectOfGrade -> SubjectRes.builder()
+                    .id(subjectOfGrade.getSubject().getId())
+                    .name(subjectOfGrade.getSubject().getName())
+                    .build()).toList();
+        }catch (Exception e){
+            log.error("Error getting subjects: {}", e.getMessage());
+            throw new RuntimeException("Error getting subjects");
         }
     }
 

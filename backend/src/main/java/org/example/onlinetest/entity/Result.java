@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Builder
@@ -26,5 +27,7 @@ public class Result {
     private int totalQuestionsCorrect;
     @CreationTimestamp
     private Date submittedAt;
+    @OneToOne(mappedBy = "result")
+    private UserForCompetition userForCompetition;
 }
 

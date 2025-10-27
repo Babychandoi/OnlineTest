@@ -4,20 +4,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.example.onlinetest.dto.ApiResponse;
-import org.example.onlinetest.dto.user.request.AnswerRequest;
 import org.example.onlinetest.dto.user.request.ExamRequest;
 import org.example.onlinetest.dto.user.request.ResultRequest;
-import org.example.onlinetest.dto.user.response.ExamDetailResponse;
-import org.example.onlinetest.dto.user.response.ExamResponse;
-import org.example.onlinetest.dto.user.response.GradeResponse;
-import org.example.onlinetest.dto.user.response.ResultResponse;
-import org.example.onlinetest.entity.Exam;
+import org.example.onlinetest.dto.user.response.*;
 import org.example.onlinetest.service.ExamService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.util.List;
 
@@ -87,4 +81,19 @@ public class ExamController {
                 .message("Get results of me successfully")
                 .build();
     }
+    @GetMapping("/getGrades")
+    ApiResponse<List<GradeResponse>> getGrades(){
+        return ApiResponse.<List<GradeResponse>>builder()
+                .data(examService.getGrades())
+                .message("Get grades successfully")
+                .build();
+    }
+    @GetMapping("/getSubjects")
+    ApiResponse<List<SubjectRes>> getSubjects(@RequestParam String gradeId){
+        return ApiResponse.<List<SubjectRes>>builder()
+                .data(examService.getSubjects(gradeId))
+                .message("Get subjects successfully")
+                .build();
+    }
+
 }

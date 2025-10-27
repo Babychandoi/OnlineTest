@@ -22,4 +22,5 @@ public class ResultResponse {
     String grade;
     String subject;
     Integer totalScore;
+    String studentName;
 }

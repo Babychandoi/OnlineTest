@@ -1,34 +1,38 @@
-package org.example.onlinetest.entity;
+    package org.example.onlinetest.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+    import jakarta.persistence.*;
+    import lombok.*;
+    import org.hibernate.annotations.CreationTimestamp;
 
-import java.util.Date;
+    import java.util.Date;
 
-@Entity
-@Table(name = "competition_users")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class UserForCompetition {
+    @Entity
+    @Table(name = "competition_users")
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public class UserForCompetition {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+        @Id
+        @GeneratedValue(strategy = GenerationType.UUID)
+        private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "competition_id", nullable = false)
-    private Competition competition;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "competition_id", nullable = false)
+        private Competition competition;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "user_id", nullable = false)
+        private User user;
 
-    private Boolean hasParticipated; // true: đã thi, false: chưa thi
+        private Boolean hasParticipated; // true: đã thi, false: chưa thi
 
-    @CreationTimestamp
-    Date registeredAt; // Ngày đăng ký
-}
+        @CreationTimestamp
+        Date registeredAt;// Ngày đăng ký
+
+        @OneToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "result_id", nullable = true)
+        private Result result; // Kết quả thi, null nếu chưa thi
+    }

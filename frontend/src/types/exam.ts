@@ -8,7 +8,10 @@ export interface SubjectResponse {
   name: string;
   totalExams: number;
 }
-
+export interface SubjectRes{
+  id: string;
+  name: string;
+}
 export interface GradeWithSubjects extends GradeResponse {
   subjects: SubjectResponse[];
 }
@@ -81,4 +84,23 @@ export interface PaginatedResponse {
   number: number;
   numberOfElements: number;
   empty: boolean;
+}
+export type ExamType = 'FREE' | 'FEE';
+
+export interface QuestionRequest {
+  content: string;
+  answers: string[];
+  correct: string;
+  score: number;
+  image?: string;
+}
+
+export interface ExamRequest {
+  title: string;
+  duration: number;
+  description: string;
+  subjectId: string;
+  gradeId: string;
+  type: ExamType;
+  questions: QuestionRequest[];
 }

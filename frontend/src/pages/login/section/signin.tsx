@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, Label, TextInput, Button, Alert } from 'flowbite-react';
 import { BookOpen, Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { signIn } from '../../../services/service';
 import { Login } from '../../../types/login';
 import { useAuth } from '../../../components/AuthContext';
+import { decodeToken, getAccessToken } from '../../../util/tokenUtils';
 
 export default function Signin() {
     const [email, setEmail] = useState('');
@@ -12,8 +13,35 @@ export default function Signin() {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, isAuthenticated } = useAuth();
+
+    // Check if user is already authenticated
+    useEffect(() => {
+        const checkAuth = async () => {
+            setIsCheckingAuth(true);
+            
+            // Check if token exists in sessionStorage
+            const token = getAccessToken();
+            if (token && isAuthenticated) {
+                // Decode token to get user role
+                const decodedToken = decodeToken(token);
+                const userScope = decodedToken?.scope;
+                
+                // Redirect based on role
+                if (userScope === 'ADMIN') {
+                    navigate('/administration');
+                } else {
+                    navigate('/');
+                }
+            } else {
+                setIsCheckingAuth(false);
+            }
+        };
+
+        checkAuth();
+    }, [isAuthenticated, navigate]);
 
     const handleSubmit = async () => {
         setError('');
@@ -28,7 +56,19 @@ export default function Signin() {
             const response = await signIn(loginData);
             if (response.code === 200) {
                 await login(response.data.token, response.data.refreshToken);
-                navigate('/');
+                
+                // Decode token to get user role/scope
+                const decodedToken = decodeToken(response.data.token);
+                const userScope = decodedToken?.scope;
+                
+                // Navigate based on role
+                if (userScope === 'ADMIN') {
+                    navigate('/administration');
+                } else if (userScope === 'TEACHER' || userScope === 'STUDENT') {
+                    navigate('/');
+                } else {
+                    navigate('/');
+                }
             } else {
                 setError('Email hoặc mật khẩu không chính xác');
             }
@@ -46,6 +86,18 @@ export default function Signin() {
     const handleForgotPassword = () => {
         navigate('/ot/forgot-password');
     };
+
+    // Show loading state while checking authentication
+    if (isCheckingAuth) {
+        return (
+            <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <p className="text-gray-600">Đang kiểm tra trạng thái đăng nhập...</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:to-gray-800 px-4 py-8">

@@ -13,6 +13,8 @@ public enum ErrorCode {
     USERNAME_INVALID(1002,"Username must be at least 4 characters long", HttpStatus.BAD_REQUEST),
     PASSWORD_INVALID(1003,"Password must be at least 4 characters long", HttpStatus.BAD_REQUEST),
     PASSWORD_NOT_MATCH(1007,"Password does not match", HttpStatus.BAD_REQUEST),
+    EMAIL_EXISTED(1008,"Email đã tồn tại", HttpStatus.BAD_REQUEST),
+    PHONE_EXISTED(1009,"Số điện thoại đã tồn tại", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1005,"Unauthenticated", HttpStatus.UNAUTHORIZED),;
     private int code;
     private String message;

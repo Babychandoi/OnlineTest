@@ -2,7 +2,9 @@ package org.example.onlinetest.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,4 +35,5 @@ public class Competition {
     private Exam exam;
     @OneToMany(mappedBy = "competition", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserForCompetition> registeredUsers = new ArrayList<>();
+
 }

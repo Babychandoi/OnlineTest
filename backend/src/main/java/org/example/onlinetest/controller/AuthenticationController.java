@@ -12,6 +12,8 @@ import org.example.onlinetest.dto.admin.response.AuthenticationResponse;
 import org.example.onlinetest.dto.admin.response.IntrospectResponse;
 import org.example.onlinetest.dto.admin.response.UserResponse;
 import org.example.onlinetest.service.AuthenticationService;
+import org.example.onlinetest.service.PasswordResetService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +26,7 @@ import java.util.List;
 @FieldDefaults(makeFinal = true , level = AccessLevel.PRIVATE)
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    PasswordResetService passwordResetService;
     @PostMapping("/login")
     ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
         var result = authenticationService.authenticate(request);
@@ -80,6 +83,18 @@ public class AuthenticationController {
                 .data(authenticationService.myProfile(id))
                 .message("My account retrieved successfully")
                 .build();
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email) {
+        passwordResetService.createPasswordResetToken(email);
+        return ResponseEntity.ok("Đã gửi email đặt lại mật khẩu đến " + email);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String token,
+                                           @RequestParam String newPassword) {
+        passwordResetService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Đặt lại mật khẩu thành công");
     }
 }
 

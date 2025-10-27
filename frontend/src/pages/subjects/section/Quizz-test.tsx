@@ -4,7 +4,7 @@ import { Clock, AlertCircle, CheckCircle, ChevronLeft, ChevronRight, Send, Arrow
 import { toast } from 'react-toastify';
 import { ExamDetailResponse, ExamResult } from '../../../types/exam';
 import { getExamDetail, resultExam } from '../../../services/service';
-
+import { formatDateTime } from '../../../util/util';
 interface ExamTakingProps {
   examId: string;
   onExit?: () => void;
@@ -36,18 +36,6 @@ const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onExit, onComplete }) =
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   // Handle answer select
   const handleAnswerSelect = useCallback((questionId: string, answerIndex: number, answerText: string) => {
     setAnswers((prev) => ({ 
@@ -76,19 +64,9 @@ const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onExit, onComplete }) =
     }
   }, [examResult, onExit]);
 
-  // Handle submit
-  const handleSubmitExam = useCallback(async () => {
+  // Submit exam function (move above handleSubmitExam)
+  const fetchSubmitExam = useCallback(async () => {
     if (!exam) return;
-
-    const unansweredCount = exam.questions.length - answeredCount;
-    if (unansweredCount > 0 && !showSubmitConfirm) {
-      setShowSubmitConfirm(true);
-      return;
-    }
-
-    setIsSubmitting(true);
-    setShowSubmitConfirm(false);
-
     try {
       const payload = {
         examId: exam.id,
@@ -100,8 +78,6 @@ const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onExit, onComplete }) =
           };
         }),
       };
-
-      console.log('Submitting exam with payload:', payload);
       
       const response = await resultExam(payload);
       if(response.code === 200){
@@ -118,14 +94,28 @@ const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onExit, onComplete }) =
       toast.error('Đã xảy ra lỗi khi nộp bài!');
       setIsSubmitting(false);
     }
-  }, [exam, answeredCount, showSubmitConfirm, answers, onComplete]);
+  }, [exam, answers, onComplete]);
 
-  // Handle auto submit
+  // Handle submit
+  const handleSubmitExam = useCallback(async () => {
+    if (!exam) return;
+
+    const unansweredCount = exam.questions.length - answeredCount;
+    if (unansweredCount > 0 && !showSubmitConfirm) {
+      setShowSubmitConfirm(true);
+      return;
+    }
+    fetchSubmitExam();
+    setIsSubmitting(true);
+    setShowSubmitConfirm(false);
+
+    
+  }, [exam, answeredCount, showSubmitConfirm, fetchSubmitExam]);
   const handleAutoSubmit = useCallback(() => {
     toast.warning('Hết giờ! Bài thi sẽ được nộp tự động.');
     setIsExamSubmitted(true);
-    handleSubmitExam();
-  }, [handleSubmitExam]);
+    fetchSubmitExam();
+  }, [fetchSubmitExam]);
 
   // Fetch exam
   useEffect(() => {
@@ -248,7 +238,7 @@ const ExamTaking: React.FC<ExamTakingProps> = ({ examId, onExit, onComplete }) =
                 <div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">Thời gian nộp bài</div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {formatDate(examResult.submittedAt)}
+                    {formatDateTime(examResult.submittedAt)}
                   </div>
                 </div>
               </div>

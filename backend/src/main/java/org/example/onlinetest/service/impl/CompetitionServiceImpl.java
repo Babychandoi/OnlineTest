@@ -52,6 +52,7 @@ public class CompetitionServiceImpl implements CompetitionService {
                     .startDate(competitionRequest.getStartTime())
                     .build();
             competitionRepository.save(competition);
+            exam.setActive(false);
             return true;
         }catch (Exception e){
             log.error("Error in creating competition: {}", e.getMessage());
@@ -274,10 +275,8 @@ public class CompetitionServiceImpl implements CompetitionService {
             UserForCompetition userForCompetition = userForCompetitionRepository
                     .findByUserAndCompetition(user, competition);
             userForCompetition.setHasParticipated(true);
+            userForCompetition.setResult(result);
             userForCompetitionRepository.save(userForCompetition);
-
-            user.getResults().add(result);
-            userRepository.save(user);
             return ResultResponse.builder()
                     .examTitle(result.getExam().getTitle())
                     .submittedAt(result.getSubmittedAt())

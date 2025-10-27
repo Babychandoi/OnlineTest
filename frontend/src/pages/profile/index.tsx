@@ -3,14 +3,14 @@ import { User, Mail, Phone, Shield, Crown, Edit2, Save, X, Loader2 } from 'lucid
 import { UserResponse } from '../../types/user';
 import { getProfile,updateProfile } from '../../services/service';
 import { toast } from 'react-toastify';
-
+import { useNavigate } from 'react-router-dom';
 const UserProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState<UserResponse | null>(null);
   const [editData, setEditData] = useState<UserResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -81,7 +81,9 @@ const UserProfile = () => {
     setEditData(userData);
     setIsEditing(false);
   };
-
+  const handlePayment = () => {
+    navigate('/payment');
+  };
   const handleChange = (field: keyof UserResponse, value: string) => {
     if (!editData) return;
     setEditData({ ...editData, [field]: value });
@@ -269,7 +271,7 @@ const UserProfile = () => {
                   <div className="mt-3">
                     <p className="text-sm text-gray-600 mb-3">Nâng cấp lên Premium để trải nghiệm đầy đủ tính năng</p>
                     <button
-                      onClick={() => alert('Chuyển đến trang đăng ký Premium')}
+                      onClick={() => handlePayment()}
                       className="px-6 py-2.5 bg-gradient-to-r from-yellow-500 to-amber-500 text-white rounded-lg hover:from-yellow-600 hover:to-amber-600 transition-all flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl"
                     >
                       <Crown className="w-4 h-4" />

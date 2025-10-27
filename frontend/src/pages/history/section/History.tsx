@@ -454,21 +454,6 @@ const ExamHistory: React.FC = () => {
                                                 </div>
                                             </div>
 
-                                            {/* Right Section */}
-                                            <div className="flex flex-col items-end gap-3">
-                                                <Badge className={`${status.color} border px-4 py-2 text-sm font-semibold`}>
-                                                    {status.label}
-                                                </Badge>
-                                                <Button
-                                                    color="indigo"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        console.log('View details:', result.id);
-                                                    }}
-                                                >
-                                                    Xem chi tiết
-                                                </Button>
-                                            </div>
                                         </div>
 
                                         {/* Progress Bar */}

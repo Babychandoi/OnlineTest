@@ -1,6 +1,6 @@
 package org.example.onlinetest.mapper;
 
-
+import org.example.onlinetest.common.ExamType;
 import org.example.onlinetest.dto.user.request.ExamRequest;
 import org.example.onlinetest.dto.user.request.QuestionRequest;
 import org.example.onlinetest.dto.user.response.ExamDetailResponse;
@@ -50,6 +50,28 @@ public interface ExamMapper {
                 .totalScore(exam.getTotalScore())
                 .questions(toQuestionResponse(questions))
                 .build();
+    }
+    default ExamDetailResponse toExamDetailResponseAdmin(Exam exam , List<Question> questions){
+        return ExamDetailResponse.builder()
+                .id(exam.getId())
+                .title(exam.getTitle())
+                .duration(exam.getDurationMinutes())
+                .type(exam.getType())
+                .totalQuestions(exam.getTotalQuestions())
+                .totalScore(exam.getTotalScore())
+                .questions(toQuestionResponseAdmin(questions))
+                .active(exam.isActive())
+                .build();
+    }
+    default List<QuestionResponse> toQuestionResponseAdmin(List<Question> question){
+        return question.stream().map(q -> QuestionResponse.builder()
+                .id(q.getId())
+                .content(q.getContent())
+                .answers(q.getAnswers())
+                .score(q.getScore())
+                .correctAnswer(q.getCorrect())
+                .image(q.getImage() == null ? null : q.getImage())
+                .build()).toList();
     }
     default List<QuestionResponse> toQuestionResponse(List<Question> question){
         return question.stream().map(q -> QuestionResponse.builder()

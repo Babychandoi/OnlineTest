@@ -1,5 +1,6 @@
 package org.example.onlinetest.service;
 
+import org.example.onlinetest.dto.user.request.AnswerRequest;
 import org.example.onlinetest.dto.user.request.ExamRequest;
 import org.example.onlinetest.dto.user.request.ResultRequest;
 import org.example.onlinetest.dto.user.response.*;
@@ -17,4 +18,6 @@ public interface ExamService {
     ExamDetailResponse getExamDetail(String examId);
     ResultResponse saveResult(ResultRequest request);
     List<ResultResponse> getResultsOfMe();
+    List<GradeResponse> getGrades();
+    List<SubjectRes> getSubjects(String gradeId);
 }

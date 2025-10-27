@@ -3,9 +3,11 @@ package org.example.onlinetest.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.onlinetest.common.Role;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,21 +27,17 @@ public class User {
     private  String phone;
 
     private boolean isPremium;
-    private LocalDateTime premiumExpiry; // Ngày hết hạn gói
-    private LocalDateTime createdAt;
+    private Date premiumExpiry; // Ngày hết hạn gói
+    private Date premiumStart; // Ngày bắt đầu gói
     private String password;
 
+    @CreationTimestamp
+    LocalDateTime createAt;
     @Enumerated(EnumType.STRING)
     private Role role; // STUDENT, TEACHER, ADMIN
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserForCompetition> competitions = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable( name = "competition_result", // bảng trung gian
-    joinColumns = @JoinColumn(name = "competition_id"),
-            inverseJoinColumns = @JoinColumn(name = "result_id") )
-    private List<Result> results = new ArrayList<>();
 
 
 }

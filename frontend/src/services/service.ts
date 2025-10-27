@@ -1,12 +1,15 @@
-import axios from "axios";
 import { ApiResponse, IntrospectResponse } from "../types/type";
 import { Login, LoginResponse, LogoutRequest } from "../types/login";
 import { UserResponse } from "../types/user";
 import axiosClient from "./axioisClient";
-import { ExamDetailResponse,  ExamResult, GradeWithSubjects, PaginatedResponse, ResultResponse } from "../types/exam";
+import { ExamDetailResponse,  ExamRequest,  ExamResult, GradeResponse, GradeWithSubjects, PaginatedResponse, ResultResponse, SubjectRes } from "../types/exam";
 import { Competition, CompetitionResponse } from "../types/competition";
+import axios from 'axios';
+import { PaymentRequest, PaymentResponse, TransactionStatus } from '../types/payment.types';
+import { CompetitionRes,ResultRes } from "../pages/ranking";
+import { MockData } from "../types/statistical.admin";
 
-const API_URL = "http://localhost:8080";
+const API_URL = process.env.REACT_APP_API_URL;
 export const signIn = async (login : Login): Promise<ApiResponse<LoginResponse>> => {
     const response = await axios.post<ApiResponse<LoginResponse>>(`${API_URL}/auth/login`,login);
     return response.data;
@@ -94,3 +97,62 @@ export const resultCompetition = async (payload : Object,competitionId : string)
 	const response = await axiosClient.post<ApiResponse<ExamResult>>(`/competitions/saveResult/${competitionId}`,payload);
 	return response.data;
 }
+export const getGrades = async() : Promise<ApiResponse<GradeResponse[]>> =>{
+	const response = await axios.get<ApiResponse<GradeResponse[]>>(`${API_URL}/exams/getGrades`);
+	return response.data;
+}
+export const getSubjects = async(gradeId : string) :Promise<ApiResponse<SubjectRes[]>> =>{
+	const response = await axiosClient.get<ApiResponse<SubjectRes[]>>(`/exams/getSubjects`,{
+		params :{gradeId}
+	});
+	return response.data;
+}
+export const createExam = async(exam : ExamRequest) :Promise<ApiResponse<Boolean>> => {
+	const response = await axiosClient.post<ApiResponse<Boolean>>(`/exams/create`,exam);
+	return response.data;
+
+}
+
+const API_BASE_URL = `${process.env.REACT_APP_API_URL}/api/payment`;
+
+export const createPayment = async (request: PaymentRequest): Promise<PaymentResponse> => {
+      const response = await axios.post<PaymentResponse>(`${API_BASE_URL}/create`, request);
+      return response.data;
+  }
+
+export const checkPaymentStatus = async (params: Record<string, string>): Promise<TransactionStatus> => {
+      const response = await axios.get<TransactionStatus>(`${API_BASE_URL}/vnpay-return`, { params });
+      return response.data;
+};
+export const getEmployees = async ( params : any) : Promise<any> =>{
+	const response = await axiosClient.get<any> (`/admin/employees`,params);
+	return response.data
+}
+export const getTop10Competitions = async() : Promise<ApiResponse<CompetitionRes[]>> => {
+	const response = await axios.get<ApiResponse<CompetitionRes[]>>(`${API_URL}/results/top-competitions`);
+	return response.data;
+}
+export const getResultsByCompetition = async(competitionId : string) : Promise<ApiResponse<ResultRes[]>> => {
+	const response = await axios.get<ApiResponse<ResultRes[]>>(`${API_URL}/results/competition/results/${competitionId}`);
+	return response.data;
+}
+export const getStatisticsByDateRange = async(startDate: string, endDate: string) : Promise<ApiResponse<MockData>> => {
+	const response = await axiosClient.get<ApiResponse<MockData>>(`/admin/statistical`,{
+		params : {startDate,endDate}
+	})    
+	return response.data
+}
+export const getStatistics = async() : Promise<ApiResponse<MockData>> => {
+	const response = await axiosClient.get<ApiResponse<MockData>>(`/admin/statistical`)    
+	return response.data
+}
+export const forgotPassword = async (email: string): Promise<void> => {
+  await axios.post(`${API_URL}/auth/forgot-password`, null, {
+    params: { email },
+  });
+};
+export const resetPassword = async (token: string,newPassword :string): Promise<void> => {
+  await axios.post(`${API_URL}/auth/reset-password`, null, {
+    params: { token, newPassword },
+  });
+};

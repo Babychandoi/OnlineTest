@@ -21,5 +21,6 @@ public class ExamDetailResponse {
     ExamType type;
     Integer totalQuestions;
     Integer totalScore;
+    Boolean active;
     List<QuestionResponse> questions;
 }

@@ -5,6 +5,17 @@ import { FileText, ChevronRight, Clock, Award, ArrowLeft, Lock, ChevronLeft } fr
 import { listExams } from '../../../../services/service';
 import { ExamResponse } from '../../../../types/exam';
 import ExamTaking from '../Quizz-test';
+import { getUserFromToken } from '../../../../util/tokenUtils';
+
+// Định nghĩa interface cho User
+interface User {
+  id: string;
+  accountType: string;
+  scope: string;
+  isPremium: boolean;
+  exp?: number;
+  iat?: number;
+}
 
 const ExamList: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -21,10 +32,12 @@ const ExamList: React.FC = () => {
   const [exams, setExams] = useState<ExamResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const [user] = useState<User | null>(() => getUserFromToken());
 
   useEffect(() => {
     if (!subjectId || !gradeId) {
@@ -61,18 +74,34 @@ const ExamList: React.FC = () => {
     return !!token;
   };
 
-  const handleExamClick = (examId: string) => {
+  const handleExamClick = (exam: ExamResponse) => {
+    // Kiểm tra đăng nhập trước
     if (!isAuthenticated()) {
       setShowLoginModal(true);
       return;
     }
-    setSelectedExamId(examId);
+
+    // Kiểm tra nếu là đề thi FEE và user chưa Premium
+    if (exam.type === 'FEE') {
+      if (!user || !user.isPremium) {
+        setShowPremiumModal(true);
+        return;
+      }
+    }
+
+    // Cho phép làm bài thi
+    setSelectedExamId(exam.id);
   };
 
   const handleLoginRedirect = () => {
     setShowLoginModal(false);
     localStorage.setItem('redirectAfterLogin', window.location.pathname);
     window.location.href = '/ot';
+  };
+
+  const handlePremiumRedirect = () => {
+    setShowPremiumModal(false);
+    navigate('/payment');
   };
 
   const handleExamExit = () => {
@@ -191,12 +220,26 @@ const ExamList: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {exams.map((exam) => {
                 const typeInfo = getExamTypeInfo(exam.type);
+                const isFeeExam = exam.type === 'FEE';
+                const canAccessExam = !isFeeExam || (user && user.isPremium);
+                
                 return (
                   <Card
                     key={exam.id}
-                    className="cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group"
-                    onClick={() => handleExamClick(exam.id)}
+                    className={`cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group ${
+                      !canAccessExam ? 'relative' : ''
+                    }`}
+                    onClick={() => handleExamClick(exam)}
                   >
+                    {/* Premium Lock Overlay */}
+                    {isFeeExam && (!user || !user.isPremium) && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-full shadow-lg">
+                          <Lock className="h-4 w-4" />
+                        </div>
+                      </div>
+                    )}
+
                     {/* Exam Header */}
                     <div className="flex items-start justify-between mb-3">
                       <Badge color={typeInfo.color as any}>{typeInfo.label}</Badge>
@@ -228,8 +271,12 @@ const ExamList: React.FC = () => {
                     <div className="border-t border-gray-200 dark:border-gray-700 my-3"></div>
 
                     {/* Action Button */}
-                    <button className="w-full py-2 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all font-medium">
-                      Làm bài thi
+                    <button className={`w-full py-2 px-4 rounded-lg transition-all font-medium ${
+                      isFeeExam && (!user || !user.isPremium)
+                        ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                        : 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-600'
+                    }`}>
+                      {isFeeExam && (!user || !user.isPremium) ? 'Nâng cấp Premium' : 'Làm bài thi'}
                     </button>
                   </Card>
                 );
@@ -312,6 +359,42 @@ const ExamList: React.FC = () => {
                   className="flex-1 py-3 px-4 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all font-medium"
                 >
                   Đăng nhập
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Premium Required Modal */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-8 transform transition-all">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 rounded-full flex items-center justify-center mb-4">
+                <Lock className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Yêu cầu Premium
+              </h3>
+              
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Đề thi này chỉ dành cho thành viên Premium. Vui lòng nâng cấp tài khoản để truy cập.
+              </p>
+              
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowPremiumModal(false)}
+                  className="flex-1 py-3 px-4 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-medium"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handlePremiumRedirect}
+                  className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all font-medium"
+                >
+                  Đăng ký Premium
                 </button>
               </div>
             </div>

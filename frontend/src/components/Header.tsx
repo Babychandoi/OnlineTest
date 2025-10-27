@@ -1,15 +1,28 @@
 import React, { useState } from "react";
-import { BookOpen, User, Menu, X, LogOut, Award, UserCircle } from 'lucide-react';
+import { BookOpen, User, Menu, X, LogOut, Award, UserCircle, Plus } from 'lucide-react';
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useAuth } from "./AuthContext";
 import { logoutApi } from "../services/service";
 import { LogoutRequest } from "../types/login";
+import { decodeToken, getAccessToken } from "../util/tokenUtils";
+
 const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Get user scope from token
+  const getUserScope = () => {
+    const token = getAccessToken();
+    if (!token) return null;
+    const decodedToken = decodeToken(token);
+    return decodedToken?.scope;
+  };
+
+  const userScope = getUserScope();
+  const canCreateExam = userScope === 'ADMIN' || userScope === 'TEACHER';
 
   const handleLogout = async () => {
     try {
@@ -40,6 +53,13 @@ const Header: React.FC = () => {
     setIsUserMenuOpen(false);
     navigate('/history');
   };
+
+  const handleCreateExam = () => {
+    setIsOpen(false);
+    setIsUserMenuOpen(false);
+    navigate('/create-exam');
+  };
+
   return (
     <>
       <style>{`
@@ -107,8 +127,6 @@ const Header: React.FC = () => {
                 Cuộc thi
                 <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
               </a>
-
-              {isAuthenticated && (
                 <a
                   href="/achievements"
                   className="relative block py-2.5 font-normal transition-all duration-300 group text-gray-800 hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:bg-clip-text hover:text-transparent"
@@ -116,7 +134,7 @@ const Header: React.FC = () => {
                   Bảng Thành tích
                   <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
                 </a>
-              )}
+
             </nav>
 
             {/* Desktop User Section */}
@@ -152,6 +170,20 @@ const Header: React.FC = () => {
                             <Award className="h-5 w-5" />
                             <span>Lịch sử luyện tập</span>
                           </button>
+                          
+                          {/* Create Exam in User Menu for ADMIN/TEACHER */}
+                          {canCreateExam && (
+                            <>
+                              <div className="border-t border-gray-200"></div>
+                              <button
+                                onClick={handleCreateExam}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                              >
+                                <Plus className="h-5 w-5" />
+                                <span>Tạo bài luyện tập</span>
+                              </button>
+                            </>
+                          )}
                         </div>
 
                         {/* Logout Section */}
@@ -217,6 +249,17 @@ const Header: React.FC = () => {
                 >
                   Bảng Thành tích
                 </a>
+              )}
+
+              {/* Create Exam Button for Mobile ADMIN/TEACHER */}
+              {canCreateExam && (
+                <button
+                  onClick={handleCreateExam}
+                  className="w-full flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium hover:from-green-700 hover:to-emerald-700 transition-all duration-300 mt-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Tạo bài luyện tập
+                </button>
               )}
 
               {/* Mobile User Section */}

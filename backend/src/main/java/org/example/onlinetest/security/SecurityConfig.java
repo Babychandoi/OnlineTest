@@ -25,9 +25,9 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] AuthorizedUrls = new String[] {"/auth/login", "/auth/introspect", "/auth/logout", "/auth/refresh","auth/**"};
+    private final String[] AuthorizedUrls = new String[] {"/auth/login", "/auth/introspect", "/auth/logout", "/auth/refresh","auth/**","/api/payment/**"};
     private  final String[] SwaggerUrls = new String[]{
-            "/admin/listSubjectsOfGrades","/exams/Exams","/competitions/all",
+            "/admin/listSubjectsOfGrades","/exams/Exams","/competitions/all","/exams/getGrades","/api/payment/**","results/**",
     };
 
     @Autowired
@@ -54,7 +54,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000" ));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000","https://onlinetest1.unaux.com"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);

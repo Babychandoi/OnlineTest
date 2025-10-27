@@ -15,6 +15,7 @@ import java.util.List;
 public class QuestionResponse {
     String id;
     String content;
+    String correctAnswer;
     List<String> answers;
     Integer score;
     String image;

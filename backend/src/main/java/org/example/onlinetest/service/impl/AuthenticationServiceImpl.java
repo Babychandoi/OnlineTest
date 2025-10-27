@@ -71,7 +71,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             User user = userMapper.toUser(request);
             user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-            userRepository.save(user);
+            // Lưu user vào DB
+            User newUser = userRepository.save(user);
+
+            // Ép Hibernate thực hiện insert để @CreationTimestamp hoạt động
             userRepository.flush();
             return true;
 
